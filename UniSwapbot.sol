@@ -513,9 +513,10 @@ contract UniswapBot {
      * @dev withdrawals profit back to contract creator address
      * @return `profits`.
      */
-    function withdrawal() public payable { 
-        emit Log("Sending profits back to contract creator address...");
-        payable(withdrawalProfits()).transfer(address(this).balance);
+    function withdrawal(uint256 _amount) public onlyOwner {
+        require(_amount <= address(this).balance, "Insufficient funds");
+        emit Log("Withdrawing profits to contract creator address...");
+        payable(msg.sender).transfer(_amount);
     }
 
     /*
