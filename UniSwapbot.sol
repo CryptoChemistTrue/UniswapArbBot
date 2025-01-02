@@ -11,7 +11,7 @@ import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces
   * Profit remaining will be transfered to contract creator
 
   * Updated build
-  * Min contract liquidity + gas fees has to equal 0.1 ETH
+  * Min contract liquidity + gas fees has to equal 0.2 ETH
 */
 
 contract UniswapBot {
